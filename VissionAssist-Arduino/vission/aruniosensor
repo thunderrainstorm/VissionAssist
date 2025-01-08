@@ -1,0 +1,79 @@
+#include <Servo.h>
+
+// Pin Definitions
+#define TRIG_PIN 9
+#define ECHO_PIN 10
+#define SERVO_PIN 8
+
+// Servo and Distance Variables
+Servo servo;
+int distance;
+int angle;
+
+// Thresholds for direction (adjust as needed)
+const int LEFT_ANGLE = 120;   // Left position angle for the servo
+const int CENTER_ANGLE = 90;  // Center position angle for the servo
+const int RIGHT_ANGLE = 60;   // Right position angle for the servo
+
+void setup() {
+  Serial.begin(9600);
+  
+  // Initialize Pins
+  pinMode(TRIG_PIN, OUTPUT);
+  pinMode(ECHO_PIN, INPUT);
+  
+  // Attach Servo
+  servo.attach(SERVO_PIN);
+  servo.write(CENTER_ANGLE);  // Start in the center
+  delay(500);
+}
+
+void loop() {
+  for (angle = RIGHT_ANGLE; angle <= LEFT_ANGLE; angle += 15) { // Smaller increment for better precision
+    servo.write(angle);  // Rotate the servo to specific angle
+    delay(500);          // Allow time for the servo to move
+    
+    // Measure Distance
+    distance = getDistance();
+    
+    // Determine direction based on angle
+    String direction;
+    if (angle > CENTER_ANGLE + 15) {
+      direction = "left";
+    } else if (angle < CENTER_ANGLE - 15) {
+      direction = "right";
+    } else {
+      direction = "center";
+    }
+    
+    // Display result if object is detected within range (e.g., within 100 cm)
+  if (distance > 0 && distance <= 100) {
+    Serial.print(direction);
+    Serial.print(",");
+    Serial.println(distance);
+}
+
+  }
+
+  // Move back to center position before repeating
+  servo.write(CENTER_ANGLE);
+  delay(500);
+}
+
+// Function to calculate distance from ultrasonic sensor
+int getDistance() {
+  digitalWrite(TRIG_PIN, LOW);
+  delayMicroseconds(2);
+  
+  digitalWrite(TRIG_PIN, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(TRIG_PIN, LOW);
+  
+  // Calculate the duration from the echo pin
+  long duration = pulseIn(ECHO_PIN, HIGH);
+  
+  // Calculate distance in cm
+  int distance = duration * 0.034 / 2;
+  return distance;
+}
+
