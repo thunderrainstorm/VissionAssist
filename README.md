@@ -4,3 +4,5 @@
 # Author
 -[@rainthunderstorm](https://github.com/thunderrainstorm)
 
+# License
+[MIT LICENSE](LICENSE)
